@@ -25,3 +25,19 @@
         RUNTIME：保留至运行时。所以我们可以通过反射去获取注解信息
 
 * `ScheduledExecutorService`有时间计划的线程池：可延迟schedule、可循环（上次发起时间开始）scheduleAtFixedRate、可循环（上次结束时间开始）scheduleWithFixedDelay
+
+```java
+ScheduledExecutorService sexecutor = Executors.newScheduledThreadPool(1);
+sexecutor.scheduleWithFixedDelay(() -> {
+    //doSomething
+}, 1, 5000, TimeUnit.MILLISECONDS);
+```
+
+* 引入jdbc数据库事务管理器DataSourceTransactionManager
+
+```pom
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-jdbc</artifactId>
+</dependency>
+```

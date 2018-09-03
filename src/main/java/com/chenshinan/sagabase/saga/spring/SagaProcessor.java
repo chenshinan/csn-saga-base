@@ -2,7 +2,7 @@ package com.chenshinan.sagabase.saga.spring;
 
 import com.chenshinan.sagabase.saga.SagaMonitor;
 import com.chenshinan.sagabase.saga.annotation.Saga;
-import com.chenshinan.sagabase.saga.bean.SagaInvokeBean;
+import com.chenshinan.sagabase.saga.bean.SagaTaskInvokeBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -49,8 +49,7 @@ public class SagaProcessor implements BeanPostProcessor {
                 LOGGER.info("saga annotation:{}", saga);
                 System.out.println(method.getDeclaringClass());
                 Object object = applicationContextHelper.getContext().getBean(method.getDeclaringClass());
-                SagaMonitor.invokeBeanMap.put(saga.code(), new SagaInvokeBean(method, object, saga));
-
+                SagaMonitor.invokeBeanMap.put(saga.code(), new SagaTaskInvokeBean(method, object, saga));
             }
         }
         return bean;

@@ -11,7 +11,8 @@ import org.springframework.stereotype.Component;
 public class SagaProducer {
 
     @Saga(code = "producerCode", description = "producerDescription")
-    public void producer() {
+    public String producer(String input) {
         System.out.println("producer");
+        return "success";
     }
 }

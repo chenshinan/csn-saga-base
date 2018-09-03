@@ -1,17 +1,22 @@
 package com.chenshinan.sagabase.saga;
 
-import com.chenshinan.sagabase.saga.bean.SagaInvokeBean;
+import com.chenshinan.sagabase.saga.bean.SagaTaskInstanceBean;
+import com.chenshinan.sagabase.saga.bean.SagaTaskInstanceBeanTask;
+import com.chenshinan.sagabase.saga.bean.SagaTaskInvokeBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ClassUtils;
 
 import javax.annotation.PostConstruct;
+import javax.sql.DataSource;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * @author shinan.chen
@@ -21,14 +26,41 @@ import java.util.concurrent.TimeUnit;
 public class SagaMonitor {
     private static final Logger LOGGER = LoggerFactory.getLogger(SagaMonitor.class);
 
-    public static final Map<String, SagaInvokeBean> invokeBeanMap = new HashMap<>();
+    public static final Map<String, SagaTaskInvokeBean> invokeBeanMap = new HashMap<>();
+
+    @Autowired
+    private DataSourceTransactionManager dataSourceTransactionManager;
+
+    @Autowired
+    private Executor executor;
+
+    /**
+     * 注入线程池
+     * @return
+     */
+    @Bean
+    public Executor asyncServiceExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(5);
+        executor.setMaxPoolSize(5);
+        executor.setQueueCapacity(99999);
+        executor.setThreadNamePrefix("csn-consumer-");
+        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+        executor.initialize();
+        return executor;
+    }
 
     @PostConstruct
     private void start() {
         ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
         scheduledExecutorService.scheduleWithFixedDelay(() -> {
             LOGGER.info("invokeBeanMap现在有多少个呢：{}", invokeBeanMap.size());
-
+            //模拟从sagaManager获取到的数据
+            SagaTaskInstanceBean instance = new SagaTaskInstanceBean();
+            instance.setCode("producerCode");
+            instance.setInput("1");
+            instance.setOutput("2");
+            executor.execute(new SagaTaskInstanceBeanTask(instance,dataSourceTransactionManager));
         }, 1, 5000, TimeUnit.MILLISECONDS);
 
         /**
