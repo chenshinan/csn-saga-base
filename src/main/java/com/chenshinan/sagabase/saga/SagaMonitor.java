@@ -7,14 +7,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.env.Environment;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ClassUtils;
 
 import javax.annotation.PostConstruct;
-import javax.sql.DataSource;
+import java.net.InetAddress;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
 
@@ -34,8 +37,12 @@ public class SagaMonitor {
     @Autowired
     private Executor executor;
 
+    @Autowired
+    Environment environment;
+
     /**
      * 注入线程池
+     *
      * @return
      */
     @Bean
@@ -55,12 +62,18 @@ public class SagaMonitor {
         ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
         scheduledExecutorService.scheduleWithFixedDelay(() -> {
             LOGGER.info("invokeBeanMap现在有多少个呢：{}", invokeBeanMap.size());
+            try {
+                String instance = InetAddress.getLocalHost().getHostAddress() + ":" + environment.getProperty("server.port");
+                LOGGER.info("instance:{}",instance);
+            }catch (Exception e){
+                LOGGER.error(e.getMessage());
+            }
             //模拟从sagaManager获取到的数据
             SagaTaskInstanceBean instance = new SagaTaskInstanceBean();
             instance.setCode("producerCode");
             instance.setInput("1");
             instance.setOutput("2");
-            executor.execute(new SagaTaskInstanceBeanTask(instance,dataSourceTransactionManager));
+            executor.execute(new SagaTaskInstanceBeanTask(instance, dataSourceTransactionManager));
         }, 1, 5000, TimeUnit.MILLISECONDS);
 
         /**

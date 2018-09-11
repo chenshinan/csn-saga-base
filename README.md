@@ -41,3 +41,15 @@ sexecutor.scheduleWithFixedDelay(() -> {
     <artifactId>spring-boot-starter-jdbc</artifactId>
 </dependency>
 ```
+
+* `Environment`（位于org.springframework.core.env包下）环境对象，可以加载出配置信息
+
+```java
+environment.getProperty("server.port");//获取配置的端口号
+```
+
+* `InetAddress`（位于java.net包下）IP地址类，可以获取当前的ip信息
+
+```java
+InetAddress.getLocalHost().getHostAddress();//获取当前ip地址
+```
