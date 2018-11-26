@@ -1,6 +1,6 @@
 package com.chenshinan.sagabase.saga.bean;
 
-import com.chenshinan.sagabase.saga.annotation.Saga;
+import com.chenshinan.sagabase.saga.annotation.SagaTask;
 
 import java.lang.reflect.Method;
 
@@ -11,13 +11,11 @@ import java.lang.reflect.Method;
 public class SagaTaskInvokeBean {
     final Method method;
     final Object object;
-    final Saga saga;
+    final SagaTask sagaTask;
 
-    public SagaTaskInvokeBean(Method method, Object object, Saga saga) {
+    public SagaTaskInvokeBean(Method method, Object object, SagaTask sagaTask) {
         this.method = method;
         this.object = object;
-        this.saga = saga;
+        this.sagaTask = sagaTask;
     }
-
-
 }

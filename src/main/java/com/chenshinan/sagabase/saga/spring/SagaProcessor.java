@@ -1,18 +1,19 @@
 package com.chenshinan.sagabase.saga.spring;
 
-import com.chenshinan.sagabase.saga.SagaMonitor;
 import com.chenshinan.sagabase.saga.annotation.Saga;
+import com.chenshinan.sagabase.saga.annotation.SagaTask;
 import com.chenshinan.sagabase.saga.bean.SagaTaskInvokeBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Method;
+
+import static com.chenshinan.sagabase.saga.SagaMonitor.invokeBeanMap;
 
 /**
  * @author shinan.chen
@@ -23,9 +24,6 @@ public class SagaProcessor implements BeanPostProcessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SagaProcessor.class);
 
-    @Autowired
-    private ApplicationContextHelper applicationContextHelper;
-
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
         return bean;
@@ -33,23 +31,13 @@ public class SagaProcessor implements BeanPostProcessor {
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-//        Class clazz = bean.getClass();
-//        Method[] methods = clazz.getDeclaredMethods();
-//        for (Method method : methods) {
-//            if (method.isAnnotationPresent(Saga.class)) {
-//                Saga saga = method.getAnnotation(Saga.class);
-//                System.out.println("sage:"+saga);
-//            }
-//        }
-
         Method[] methods = ReflectionUtils.getAllDeclaredMethods(bean.getClass());
         for (Method method : methods) {
-            Saga saga = AnnotationUtils.getAnnotation(method, Saga.class);
-            if (saga != null) {
-                LOGGER.info("saga annotation:{}", saga);
-                System.out.println(method.getDeclaringClass());
-                Object object = applicationContextHelper.getContext().getBean(method.getDeclaringClass());
-                SagaMonitor.invokeBeanMap.put(saga.code(), new SagaTaskInvokeBean(method, object, saga));
+            SagaTask sagaTask = AnnotationUtils.getAnnotation(method, SagaTask.class);
+            if (sagaTask != null) {
+                LOGGER.info("sagaTask annotation:{}", sagaTask);
+                String key = sagaTask.code()+":"+sagaTask.sagaCode();
+                invokeBeanMap.put(key, new SagaTaskInvokeBean(method, bean, sagaTask));
             }
         }
         return bean;

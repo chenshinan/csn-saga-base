@@ -7,14 +7,16 @@ import java.lang.annotation.Target;
 
 /**
  * @author shinan.chen
- * @date 2018/8/29
+ * @since 2018/11/26
  */
-
-@Target({ElementType.METHOD})
+@Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Saga {
-
+public @interface SagaTask {
     String code();
 
+    String sagaCode();
+
     String description() default "";
+
+    int seq() default 1;
 }
